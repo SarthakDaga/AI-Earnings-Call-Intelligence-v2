@@ -1,0 +1,17 @@
+Date: April 30, 2025
+Ticker: ACME
+Q2 Fiscal Year 2025
+
+Operator: Good afternoon. All participants are in listen-only mode. A question-and-answer session will follow the prepared remarks.
+Rita Voss: Welcome to the Acme Robotics first quarter call. During this call we may make forward-looking statements. These are subject to risks and uncertainties.
+Acme Corporation reported revenue of $4,200,000,000 for the quarter, up 18 percent from a year ago.
+Daniel Okafor: Thanks Rita. Warehouse automation demand was strong this quarter. Our Atlas picker robot shipped to forty new customers.
+Gross margin was 52 percent, helped by lower battery cell costs. Supply of servo motors remains tight but is improving.
+Revenue: $4.2B was a record for the company.
+Priya Raman: Operating expenses were $1,350,000,000. We expect second quarter revenue of $4.5 billion, plus or minus two percent.
+Operator: We will now take our first question. The first question comes from Marcus Lee with Northbridge Securities.
+Marcus Lee: Can you talk about servo motor supply and when constraints ease?
+Daniel Okafor: Servo supply was the main bottleneck. We qualified a second vendor and expect constraints to ease by the third quarter.
+Operator: Our next question comes from Elena Park with Harbor Capital.
+Elena Park: How should we think about the Atlas picker pricing as competition increases?
+Priya Raman: We are holding list pricing. Discounting has been minimal and margins should stay near 50 percent.

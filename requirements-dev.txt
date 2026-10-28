@@ -1,0 +1,4 @@
+-r requirements-core.txt
+-r requirements-ui.txt
+pytest>=8.0
+ruff>=0.6

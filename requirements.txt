@@ -1,0 +1,4 @@
+# Everything (pipeline + API + UI). For a lighter install see requirements-*.txt
+-r requirements-core.txt
+-r requirements-ml.txt
+-r requirements-ui.txt

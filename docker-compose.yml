@@ -1,0 +1,33 @@
+# Fully free stack: API + UI + (optional) local Ollama.
+#   docker compose up --build                       # API + UI, bring your own LLM endpoint
+#   docker compose --profile ollama up --build      # also run Ollama in a container
+#   docker compose exec ollama ollama pull llama3.2:3b
+services:
+  api:
+    build: .
+    environment:
+      MODE: api
+      PORT: 7860
+      EARNINGS_DATA_DIR: /data
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_MODEL: ${LLM_MODEL:-llama3.2:3b}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-}
+      PRELOAD_MODELS: "1"
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    ports: ["7860:7860"]
+    volumes: ["./data:/data"]
+  ui:
+    build: .
+    environment: { MODE: ui, PORT: 8501, API_URL: "http://api:7860" }
+    ports: ["8501:8501"]
+    depends_on: [api]
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    volumes: ["ollama:/root/.ollama"]
+    ports: ["11434:11434"]
+volumes:
+  ollama:

@@ -1,0 +1,5 @@
+# Free open models, CPU is fine. Needed by scripts/run_pipeline.py and when serving real embeddings.
+# CPU-only torch is much smaller:  pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.1
+transformers>=4.38
+sentence-transformers>=2.5
