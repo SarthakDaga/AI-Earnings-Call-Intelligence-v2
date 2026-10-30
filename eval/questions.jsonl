@@ -1,0 +1,14 @@
+# Starter set: questions that need NO verbatim evidence span. Merge these into eval/questions.jsonl.
+# Corpus loaded: AAPL Q3 2024-Q2 2026, AMZN Q2 2024-Q1 2026, GOOGL Q2 2024-Q1 2026, MSFT Q4 2024-Q3 2026, NVDA Q1 2025-Q4 2026 (fiscal labels for AAPL/MSFT/NVDA).
+# Correct behaviour for every answerable:false line is to abstain (INSUFFICIENT_EVIDENCE).
+{"id":"q040","category":"unanswerable","question":"What was Meta's total revenue on its most recent earnings call?","gold_answer":"","evidence":[],"answerable":false,"split":"dev"}
+{"id":"q041","category":"unanswerable","question":"What did Tesla's management say about robotaxi timing on its latest earnings call?","gold_answer":"","evidence":[],"answerable":false,"split":"test"}
+{"id":"q042","category":"unanswerable","question":"What gross margin guidance did Intel give on its latest earnings call?","gold_answer":"","evidence":[],"answerable":false,"split":"dev"}
+{"id":"q043","category":"unanswerable","question":"What was NVIDIA's data center revenue in fiscal Q2 2019?","gold_answer":"","evidence":[],"answerable":false,"split":"test"}
+{"id":"q044","category":"unanswerable","question":"What did Alphabet's management say on its Q4 2026 earnings call?","gold_answer":"","evidence":[],"answerable":false,"split":"dev"}
+{"id":"q045","category":"unanswerable","question":"Which restaurant did Apple's CFO recommend during the call?","gold_answer":"","evidence":[],"answerable":false,"split":"test"}
+{"id":"q050","category":"trap","question":"What did Apple's management say about iPhone demand on its Q1 2024 earnings call?","gold_answer":"","evidence":[],"answerable":false,"split":"dev"}
+{"id":"q051","category":"trap","question":"What did Microsoft say about Azure capacity on its Q2 2024 earnings call?","gold_answer":"","evidence":[],"answerable":false,"split":"test"}
+{"id":"q052","category":"trap","question":"What did NVIDIA report for Q1 2024?","gold_answer":"","evidence":[],"answerable":false,"split":"dev"}
+{"id":"q053","category":"trap","question":"What did Apple say about services growth on its Q4 2026 earnings call?","gold_answer":"","evidence":[],"answerable":false,"split":"test"}
+{"id":"q060","category":"price_linked","question":"How did NVIDIA's stock move in the 1 and 5 trading days after its earnings call on 2025-02-26?","gold_answer":"-8.48% after 1 day and -10.65% after 5 days","evidence":[],"expected_tools":["get_price_reaction"],"split":"test"}

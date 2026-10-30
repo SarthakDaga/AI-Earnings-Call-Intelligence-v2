@@ -1,0 +1,10 @@
+# One JSON object per line. Copy to eval/questions.jsonl and replace with ~40-60 questions YOU verified against the real transcripts.
+# category: single_fact | exact_term | thematic | cross_quarter | price_linked | unanswerable | trap
+# evidence.span must be copied verbatim from the transcript (numbers may be written either way: "$68 billion" or "$68,000,000,000").
+# split: "dev" (tune on this) or "test" (never look at it while tuning). Aim for roughly 60/40.
+# expected_tools is only needed for agent questions (cross_quarter, price_linked).
+{"id":"q001","category":"single_fact","question":"What data center revenue did NVIDIA report in Q4 FY2026?","gold_answer":"<number from the transcript>","evidence":[{"transcript":"NVDA_Q4_2026","span":"<verbatim sentence from the transcript>"}],"split":"dev"}
+{"id":"q020","category":"cross_quarter","question":"How did management's tone on supply constraints change between Q1 and Q4?","gold_answer":"<your verified answer>","evidence":[{"transcript":"NVDA_Q1_2026","span":"<verbatim span>"},{"transcript":"NVDA_Q4_2026","span":"<verbatim span>"}],"expected_tools":["search_transcripts"],"split":"test"}
+{"id":"q030","category":"price_linked","question":"How did the stock move in the 5 days after the Q4 call?","gold_answer":"<computed from real prices>","evidence":[],"expected_tools":["get_price_reaction"],"split":"test"}
+{"id":"q040","category":"unanswerable","question":"What was NVIDIA's revenue in Q2 FY2019?","gold_answer":"","evidence":[],"answerable":false,"split":"dev"}
+{"id":"q050","category":"trap","question":"<fiscal-vs-calendar confusion or a missing-quarter question>","gold_answer":"<answer, or empty if the correct behaviour is to abstain>","evidence":[],"answerable":false,"split":"test"}
