@@ -217,3 +217,184 @@ def test_operator_only_labels_split_operator_from_speech():
     assert p.qa_found and p.analysts == ["Sam Smith", "Pat Jones"]
     clean = to_clean_text(p)
     assert "Your line is open" not in clean and "Revenue grew strongly" in clean
+
+# ── Amazon-style layout: "Name" line, then "Title, Firm" line (no blank between), then the speech ──
+AMAZON_STYLE = """Amazon.com, Inc. (AMZN)
+Earnings Call: Q1 2026
+Apr 29, 2026
+
+Operator
+Thank you for standing by. Good day, everyone, welcome to the Amazon.com Q1 2026 financial results teleconference. At this time, all participants are in a listen-only mode. After the presentation, there will be a question-and-answer session.
+
+Dave Fildes
+VP of Investor Relations, Amazon
+Hello, Welcome to our Q1 2026 financial results conference call. Joining us today to answer your questions is Andy Jassy, our CEO.
+
+Andy Jassy
+President and CEO, Amazon
+Thanks, Dave. AWS grew twenty percent year over year and we keep investing heavily in custom silicon, because demand for capacity remains strong across every customer segment we serve.
+
+Operator
+Thank you. Our first question comes from the line of Eric Sheridan with Barclays. Please go ahead.
+
+Eric Sheridan
+Managing Director and Senior Equity Research Analyst, Barclays
+Andy, if I could ask about capacity constraints and how you think about the pace of investment this year, what are you seeing?
+
+Andy Jassy
+President and CEO, Amazon
+We are capacity constrained in a few places and expect that to ease over the next several quarters as new data centers come online.
+
+Operator
+Our next question comes from the line of Brian Nowak with Morgan Stanley. Please go ahead.
+
+Brian Nowak
+Managing Director and Senior Equity Research Analyst, Morgan Stanley
+Thanks. Can you talk about retail margins and the outlook for advertising over the coming quarters, please?
+
+Brian Olsavsky
+Senior Vice President and Chief Financial Officer, Amazon
+Retail margins improved on regionalization and we expect advertising to keep growing faster than retail sales overall.
+
+Dave Fildes
+VP of Investor Relations, Amazon
+Thank you for joining us today. A replay will be available on our investor relations website shortly.
+"""
+
+
+def test_title_line_under_a_name_is_not_speech():
+    """Real AMZN leak: 'Managing Director and Senior Equity Research Analyst, Barclays Andy, if I could...'"""
+    p = parse_transcript(AMAZON_STYLE)
+    sheridan = next(t for t in p.turns if t.speaker == "Eric Sheridan")
+    assert sheridan.title.startswith("Managing Director") and sheridan.text.startswith("Andy, if I could")
+    assert all("Managing Director" not in t.text and "Investor Relations, Amazon" not in t.text for t in p.turns)
+
+
+def test_few_prepared_speakers_still_find_the_qa_boundary():
+    """Amazon has only two prepared speakers, so the operator line that names the first analyst must be enough."""
+    p = parse_transcript(AMAZON_STYLE)
+    by_speaker = {(t.speaker, t.section) for t in p.turns}
+    assert ("Eric Sheridan", "qa") in by_speaker and ("Eric Sheridan", "prepared") not in by_speaker
+    first_qa = next(t for t in p.turns if t.section == "qa")
+    assert first_qa.role == "operator" and "first question" in first_qa.text
+    roles = {t.speaker: t.role for t in p.turns}
+    assert roles["Eric Sheridan"] == "analyst" and roles["Brian Olsavsky"] == "executive"
+    assert roles["Dave Fildes"] == "ir"
+
+
+def test_opening_operator_mentioning_qa_session_does_not_start_qa():
+    p = parse_transcript(AMAZON_STYLE)
+    assert p.turns[0].section == "prepared" and p.turns[1].section == "prepared"
+
+
+APPLE_STYLE = """Apple Inc. (AAPL)
+Earnings Call: Q1 2026
+
+Operator
+Good day, and welcome to the Apple Inc. earnings conference call. Today's call is being recorded.
+
+Suhasini Chandramouli
+Director, Investor Relations
+Thank you. Good afternoon, and thank you for joining us.
+
+Tim Cook
+Chief Executive Officer
+Thanks, Suhasini. Today Apple is reporting a record December quarter with revenue growth across all of our geographic segments.
+
+Operator
+Our first question comes from Ben Reitzes with Melius Research
+
+Ben Reitzes
+Thanks for taking the question. How is iPhone demand trending in China this quarter?
+
+Tim Cook
+Demand in China improved during the quarter and we are encouraged by the trends we see there.
+
+Operator
+Our next question comes from Erik Woodring with Morgan Stanley Research
+
+Erik Woodring
+Thanks. Can you talk about the services margin outlook for the next few quarters, please?
+"""
+
+
+def test_one_line_operator_announcement_is_never_swallowed_as_a_title():
+    """Regression found by comparing parsers on the real corpus: 'Our next question comes from X with Y Research'
+    contains a title-like word and was eaten as a title, which lost the analyst names (AAPL 11 -> 2)."""
+    p = parse_transcript(APPLE_STYLE)
+    assert {"Ben Reitzes", "Erik Woodring"} <= set(p.analysts)
+    ops = [t for t in p.turns if t.role == "operator"]
+    assert any(t.text.startswith("Our first question comes from Ben Reitzes") for t in ops)
+    assert all(t.title == "" for t in ops)
+    assert {t.speaker for t in p.turns if t.role == "analyst" and t.section == "qa"} == {"Ben Reitzes", "Erik Woodring"}
+    cook = next(t for t in p.turns if t.speaker == "Tim Cook")
+    assert cook.title == "Chief Executive Officer" and cook.text.startswith("Thanks, Suhasini")
+
+
+CAPIQ_STYLE = """Apple Inc. (AAPL) Q1 2026 Earnings Call January 29, 2026 5:00 PM EST
+
+Company Participants
+
+Suhasini Chandramouli - Director of Investor Relations
+Timothy Cook - CEO & Director
+
+Conference Call Participants
+
+Amit Daryanani - Evercore ISI Institutional Equities, Research Division
+Erik Woodring - Morgan Stanley, Research Division
+
+Presentation
+
+Suhasini Chandramouli
+Director of Investor Relations
+
+Good afternoon, and welcome to the Apple earnings call. Speaking first today is Apple's CEO, Tim Cook.
+
+Timothy Cook
+CEO & Director
+
+Thank you, Suhasini. Good afternoon, everyone, and thanks for joining us on the call today.
+
+Suhasini Chandramouli
+Director of Investor Relations
+
+Thank you. Operator, may we have the first question, please?
+
+Operator
+
+Our first question comes from Amit Daryanani with Evercore.
+
+Amit Daryanani
+Evercore ISI Institutional Equities, Research Division
+
+Yes, I have 2. Maybe to start with, there is a lot of focus on the memory constraints, can you talk about them?
+
+Timothy Cook
+CEO & Director
+
+Yes, Amit, it's Tim. Let me back up a bit and talk about the constraints we saw during the quarter.
+
+Operator
+
+Our next question comes from Erik Woodring with Morgan Stanley.
+
+Erik Woodring
+Morgan Stanley, Research Division
+
+Thanks. Can you talk about the services margin outlook for the next few quarters, please?
+"""
+
+
+def test_participant_list_layout_keeps_roles_and_drops_title_lines():
+    """Real AAPL file (S&P-style): participant lists on top, then 'Name' + title line + speech.
+    Regression: the IR person became an 'analyst' and all announced analysts were lost."""
+    p = parse_transcript(CAPIQ_STYLE)
+    assert set(p.analysts) == {"Amit Daryanani", "Erik Woodring"}
+    roles = {t.speaker: t.role for t in p.turns}
+    assert roles["Suhasini Chandramouli"] == "ir" and roles["Timothy Cook"] == "executive"
+    assert roles["Amit Daryanani"] == "analyst" and roles["Erik Woodring"] == "analyst"
+    ir = next(t for t in p.turns if t.speaker == "Suhasini Chandramouli")
+    assert ir.title == "Director of Investor Relations" and ir.text.startswith("Good afternoon")
+    amit = next(t for t in p.turns if t.speaker == "Amit Daryanani")
+    assert amit.text.startswith("Yes, I have 2") and amit.section == "qa"
+    assert all("Research Division" not in t.text for t in p.turns)
