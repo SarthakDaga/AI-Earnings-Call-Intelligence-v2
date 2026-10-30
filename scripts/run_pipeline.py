@@ -28,7 +28,8 @@ from src.sentiment.pipeline import sentences_with_sections  # noqa: E402
 
 
 def run_pipeline(force: bool = False, configs: list[str] | None = None,
-                 skip_sentiment: bool = False, skip_embeddings: bool = False) -> None:
+                 skip_sentiment: bool = False, skip_embeddings: bool = False,
+                 tickers: list[str] | None = None) -> None:
     configs = configs or ["v2"]
     print("=" * 60 + "\n  Earnings Call Intelligence - pipeline\n" + "=" * 60)
     init_db()
@@ -37,6 +38,10 @@ def run_pipeline(force: bool = False, configs: list[str] | None = None,
         print("\nNo transcripts found in data/transcripts/ (files named TICKER_Q#_YYYY.txt).")
         return
 
+    if tickers:  # targeted rebuild, e.g. --tickers AMZN --force: other companies are left untouched
+        wanted = {x.upper() for x in tickers}
+        raw = [t for t in raw if t["ticker"].upper() in wanted]
+        print(f"Only processing: {', '.join(sorted(wanted))} ({len(raw)} transcript(s))")
     ids = []
     for t in raw:
         label = f"{t['ticker']} {t['quarter']} {t['year']}"
@@ -87,5 +92,6 @@ if __name__ == "__main__":
     ap.add_argument("--configs", nargs="+", default=["v2"], choices=list(config.CHUNK_CONFIGS))
     ap.add_argument("--skip-sentiment", action="store_true")
     ap.add_argument("--skip-embeddings", action="store_true")
+    ap.add_argument("--tickers", nargs="+", help="only (re)process these tickers, e.g. --tickers AMZN")
     a = ap.parse_args()
-    run_pipeline(a.force, a.configs, a.skip_sentiment, a.skip_embeddings)
+    run_pipeline(a.force, a.configs, a.skip_sentiment, a.skip_embeddings, tickers=a.tickers)
