@@ -51,3 +51,6 @@ Thumbs.db
 htmlcov/
 *.log
 *.zip
+
+*.bak
+audit_*.txt
